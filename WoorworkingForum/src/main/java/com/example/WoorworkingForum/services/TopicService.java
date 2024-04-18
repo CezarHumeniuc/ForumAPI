@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-//TODO Comment likes dislikes. Delete and update autz. Unique constraints for erryone + tbd. userid in header, de facut sortare. Enum pe rol poate
 @Service
 public class TopicService {
 
@@ -50,17 +49,18 @@ public class TopicService {
         try {
             Optional<Topic> topic = topicRepository.findById(id);
 
-            if(topic.isPresent()) {
+            if (topic.isPresent()) {
                 int views = topic.get().getViews() + 1;
                 topic.get().setViews(views);
                 Topic topicA = topicRepository.saveAndFlush(topic.get());
+
                 response = new ResponseEntity<>(topicA, HttpStatus.FOUND);
             } else {
                 response = new ResponseEntity<>("Topic not found", HttpStatus.NOT_FOUND);
             }
 
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -79,7 +79,7 @@ public class TopicService {
 
         List<Topic> topicList = topicRepository.findAll(example);
 
-        if(topicList.isEmpty()) {
+        if (topicList.isEmpty()) {
             response = new ResponseEntity<>(topicRepository.findAll(), HttpStatus.NOT_FOUND);
         } else {
             response = new ResponseEntity<>(topicList, HttpStatus.FOUND);
@@ -92,7 +92,8 @@ public class TopicService {
         ResponseEntity<?> response = null;
 
         try {
-            if(userValidCheck(userId)) {
+            if (userValidCheck(userId)) {
+
                 User user = userRepository.findById(userId).get();
                 topic.setUser(user);
                 topic.setTimeOfPosting(LocalDateTime.now());
@@ -107,6 +108,7 @@ public class TopicService {
             } else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         } catch (Exception e) {
             response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -120,14 +122,16 @@ public class TopicService {
         try {
             Optional<User> user = userRepository.findById(userId);
             Optional<Topic> topic = topicRepository.findById(id);
-            if(userValidCheck(userId)) {
+
+            if (userValidCheck(userId)) {
                 if (topic.isPresent()) {
-                    if(user.get().getRoles().contains("Admin") ||
+                    if (user.get().getRoles().contains("Admin") ||
                             user.get().getTopics().contains(topic.get())) {   // Checks if user is admin or poster.
 
                         user.get().getTopics().remove(topic.get());
                         userRepository.saveAndFlush(user.get());
                         topicRepository.deleteById(id);
+
                         response = new ResponseEntity<>("Topic deleted", HttpStatus.OK);
 
                     }else {
@@ -143,7 +147,7 @@ public class TopicService {
             }
 
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -155,21 +159,26 @@ public class TopicService {
         try {
             Optional<Topic> topic  = topicRepository.findById(id);
             Optional<User> user = userRepository.findById(userId);
-            if(topic.isPresent()) {
-                if(userValidCheck(userId)) {
-                    if(user.get().getRoles().contains("Admin") ||
+
+            if (topic.isPresent()) {
+                if (userValidCheck(userId)) {
+                    if (user.get().getRoles().contains("Admin") ||
                             user.get().getTopics().contains(topic.get())) {
+
                         Topic topicUpdate = topicRepository.findById(id).get();
+
                         if (updates.containsKey("title")) {
                             topicUpdate.setTitle(updates.get("title"));
                         }
                         if (updates.containsKey("content")) {
                             topicUpdate.setContent(updates.get("content"));
                         }
+
                         topicUpdate.setLastUpdated(LocalDateTime.now());
                         topicUpdate = topicRepository.saveAndFlush(topicUpdate);
 
                         response = new ResponseEntity<>(topicUpdate, HttpStatus.OK);
+
                     } else {
                         response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
                     }
@@ -177,8 +186,9 @@ public class TopicService {
             }else {
                 response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -189,12 +199,14 @@ public class TopicService {
         ResponseEntity<?> response = null;
 
         try {
-            if(userValidCheck(userId)) {
+            if (userValidCheck(userId)) {
                 Optional<Topic> topic = topicRepository.findById(id);
+
                 if (topic.isPresent()) {
                     int likes = topic.get().getLikes() + 1;
                     topic.get().setLikes(likes);
                     Topic updatedTopic = topicRepository.saveAndFlush(topic.get());
+
                     response = new ResponseEntity<>(updatedTopic.getLikes(), HttpStatus.OK);
                 } else {
                     response = new ResponseEntity<>("Topic not found", HttpStatus.NOT_FOUND);
@@ -202,8 +214,9 @@ public class TopicService {
             }else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return response;
     }
@@ -212,12 +225,14 @@ public class TopicService {
         ResponseEntity<?> response = null;
 
         try {
-            if(userValidCheck(userId)) {
+            if (userValidCheck(userId)) {
                 Optional<Topic> topic = topicRepository.findById(id);
+
                 if (topic.isPresent()) {
                     int dislikes = topic.get().getDislikes() + 1;
                     topic.get().setDislikes(dislikes);
                     Topic updatedTopic = topicRepository.saveAndFlush(topic.get());
+
                     response = new ResponseEntity<>(updatedTopic.getDislikes(), HttpStatus.OK);
                 } else {
                     response = new ResponseEntity<>("Topic not found", HttpStatus.NOT_FOUND);
@@ -225,9 +240,11 @@ public class TopicService {
             } else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         return response;
     }
 
@@ -236,31 +253,39 @@ public class TopicService {
 
         try {
             List<Topic> sortedTopics = new ArrayList<>();
-            if(sortDirection == 1) {
-                if(sortBy.equalsIgnoreCase("likes")) {
+
+            if (sortDirection == 1) {
+                if (sortBy.equalsIgnoreCase("likes")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.ASC, "likes"));
-                }else if(sortBy.equalsIgnoreCase("views")) {
+                }else if (sortBy.equalsIgnoreCase("views")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.ASC, "views"));
-                }else if(sortBy.equalsIgnoreCase("date")) {
+                }else if (sortBy.equalsIgnoreCase("date")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.ASC, "timeOfPosting"));
-                }else if(sortBy.equalsIgnoreCase("last-updated")) {
+                }else if (sortBy.equalsIgnoreCase("last-updated")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.ASC, "lastUpdated"));
+                }else if(sortBy.equalsIgnoreCase("comments")) {
+                    sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.ASC, "nrOfComments"));
                 }
-            }else if(sortDirection == - 1) {
-                if(sortBy.equalsIgnoreCase("likes")) {
+
+            }else if (sortDirection == - 1) {
+                if (sortBy.equalsIgnoreCase("likes")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.DESC, "likes"));
-                }else if(sortBy.equalsIgnoreCase("views")) {
+                }else if (sortBy.equalsIgnoreCase("views")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.DESC, "views"));
-                }else if(sortBy.equalsIgnoreCase("date")) {
+                }else if (sortBy.equalsIgnoreCase("date")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.DESC, "timeOfPosting"));
-                }else if(sortBy.equalsIgnoreCase("last-updated")) {
+                }else if (sortBy.equalsIgnoreCase("last-updated")) {
                     sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.DESC, "lastUpdated"));
+                }else if(sortBy.equalsIgnoreCase("comments")) {
+                    sortedTopics = topicRepository.findAll(Sort.by(Sort.Direction.DESC, "nrOfComments"));
                 }
             }
             response = new ResponseEntity<>(sortedTopics, HttpStatus.OK);
+
         }catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         return response;
     }
 }

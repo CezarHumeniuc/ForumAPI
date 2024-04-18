@@ -3,6 +3,7 @@ package com.example.WoorworkingForum.services;
 import com.example.WoorworkingForum.entities.Comment;
 import com.example.WoorworkingForum.entities.Topic;
 import com.example.WoorworkingForum.entities.User;
+import com.example.WoorworkingForum.helpers.CustomMessages;
 import com.example.WoorworkingForum.repositories.CommentRepository;
 import com.example.WoorworkingForum.repositories.TopicRepository;
 import com.example.WoorworkingForum.repositories.UserRepository;
@@ -41,9 +42,10 @@ public class CommentService {
         ResponseEntity<?> response = null;
 
         try {
-            if(userValidCheck(userId)) {
+            if (userValidCheck(userId)) {
                 Optional<Topic> topic = topicRepository.findById(topicId);
                 User user = userRepository.findById(userId).get();
+
                 if (topic.isPresent()) {
                     comment.setTimeOfPosting(LocalDateTime.now());
                     comment.setTopic(topic.get());
@@ -59,14 +61,16 @@ public class CommentService {
                     Comment addedComment = commentRepository.saveAndFlush(comment);
 
                     response = new ResponseEntity<>(addedComment, HttpStatus.CREATED);
+
                 } else {
                     response = new ResponseEntity<>("Topic not found", HttpStatus.NOT_FOUND);
                 }
             } else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -76,14 +80,15 @@ public class CommentService {
         ResponseEntity<?> response = null;
 
         try {
-            if(commentRepository.existsById(id)) {
+            if (commentRepository.existsById(id)) {
                 Comment foundComment = commentRepository.findById(id).get();
                 response = new ResponseEntity<>(foundComment, HttpStatus.FOUND);
-            }else {
+            } else {
                 response = new ResponseEntity<>("Comment was not found", HttpStatus.NOT_FOUND);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -95,7 +100,8 @@ public class CommentService {
         try{
             if(topicRepository.existsById(topicId)) {
                 Topic topic = topicRepository.findById(topicId).get();
-                if(!topic.getComments().isEmpty() && !(topic.getComments() == null)) {
+
+                if (!topic.getComments().isEmpty() && !(topic.getComments() == null)) {
                     response = new ResponseEntity<>(topic.getComments(), HttpStatus.FOUND);
                 }else {
                     response = new ResponseEntity<>("No comments for this thread", HttpStatus.NO_CONTENT);
@@ -103,8 +109,9 @@ public class CommentService {
             } else {
                 response = new ResponseEntity<>("Topic not found", HttpStatus.NOT_FOUND);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -117,6 +124,7 @@ public class CommentService {
         try {
             Optional<User> user = userRepository.findById(userId);
             Optional<Comment> comment = commentRepository.findById(id);
+
             if(userValidCheck(userId)) {
                 if (comment.isPresent()) {
                     if(user.get().getRoles().contains("Admin") ||
@@ -130,18 +138,17 @@ public class CommentService {
                     } else {
                         response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
                     }
-
                 } else {
                     response = new ResponseEntity<>("Comment was not found", HttpStatus.NOT_FOUND);
                 }
-
             }else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
         } catch (Exception e) {
-            response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         return response;
 
     }
@@ -152,9 +159,10 @@ public class CommentService {
         try {
             Optional<Comment> comment = commentRepository.findById(id);
             Optional<User> user = userRepository.findById(userId);
-            if(comment.isPresent()) {
-                if(userValidCheck(userId)) {
-                    if(user.get().getRoles().contains("Admin") ||
+
+            if (comment.isPresent()) {
+                if (userValidCheck(userId)) {
+                    if (user.get().getRoles().contains("Admin") ||
                             user.get().getComments().contains(comment.get())) {
 
                         if (updates.containsKey("content")) {
@@ -163,6 +171,7 @@ public class CommentService {
                             updateComment = commentRepository.saveAndFlush(updateComment);
 
                             response = new ResponseEntity<>(updateComment, HttpStatus.OK);
+
                         } else {
                             response = new ResponseEntity<>("Illegal update", HttpStatus.BAD_REQUEST);
                         }
@@ -175,8 +184,9 @@ public class CommentService {
             }else {
                 response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
         } catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -187,21 +197,25 @@ public class CommentService {
         ResponseEntity<?> response = null;
 
         try{
-            if(userValidCheck(userId)){
+            if (userValidCheck(userId)){
                 Optional<Comment> comment = commentRepository.findById(id);
-                if(comment.isPresent()) {
+
+                if (comment.isPresent()) {
                     int likes = comment.get().getLikes() + 1;
                     comment.get().setLikes(likes);
                     Comment updatedComment = commentRepository.saveAndFlush(comment.get());
+
                     response = new ResponseEntity<>(updatedComment, HttpStatus.OK);
+
                 } else {
                     response = new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
                 }
             }else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         }catch (Exception e) {
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -211,12 +225,14 @@ public class CommentService {
         ResponseEntity<?> response = null;
 
         try {
-            if(userValidCheck(userId)) {
+            if (userValidCheck(userId)) {
                 Optional<Comment> comment = commentRepository.findById(id);
+
                 if(comment.isPresent()) {
                     int dislikes = comment.get().getDislikes() + 1;
                     comment.get().setDislikes(dislikes);
                     Comment updatedComment = commentRepository.saveAndFlush(comment.get());
+
                     response = new ResponseEntity<>(updatedComment, HttpStatus.OK);
                 }else {
                     response = new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
@@ -224,8 +240,9 @@ public class CommentService {
             }else {
                 response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
+
         }catch (Exception e){
-            response = new ResponseEntity<>(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;

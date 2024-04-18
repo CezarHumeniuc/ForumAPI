@@ -78,7 +78,7 @@ public class TopicController {
 
     // -- Sorting for Topics --
 
-    // sortBy -> {views, likes, date, last-updated}
+    // sortBy -> {views, likes, date, last-updated, comments}
     @GetMapping("/sort")
     public ResponseEntity<?> getTopicsSorted(@RequestParam String sortBy,
                                              @RequestParam Integer sortDirection) {

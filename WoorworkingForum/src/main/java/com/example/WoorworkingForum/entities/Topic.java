@@ -42,11 +42,13 @@ public class Topic {
 
     private int views;
 
+    private int nrOfComments;
+
     public Topic() {
     }
 
     public Topic(Long id, String title, String content, LocalDateTime timeOfPosting, List<Comment> comments,
-                 LocalDateTime lastUpdated, User user, int likes, int views, int dislikes) {
+                 LocalDateTime lastUpdated, User user, int likes, int views, int dislikes, int nrOfComments) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -57,6 +59,19 @@ public class Topic {
         this.dislikes = dislikes;
         this.user = user;
         this.views = views;
+        this.nrOfComments = nrOfComments;
+    }
+
+    public int getNrOfComments() {
+        if(comments.isEmpty()) {
+            return 0;
+        }else {
+            return comments.size();
+        }
+    }
+
+    public void setNrOfComments(int nrOfComments) {
+        this.nrOfComments = nrOfComments;
     }
 
     public User getUser() {
