@@ -4,6 +4,7 @@ package com.example.WoorworkingForum.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,8 @@ public class Topic {
     private String title;
 
     @NotBlank(message = "Topic body cannot be empty")
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime timeOfPosting;
@@ -28,11 +31,11 @@ public class Topic {
     private LocalDateTime lastUpdated;
 
     @JsonIgnoreProperties("topic")
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Comment> comments;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("topics")
+    @JsonIgnoreProperties({"topics", "comments"})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
