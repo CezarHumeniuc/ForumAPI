@@ -34,7 +34,7 @@ public class Topic {
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Comment> comments;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"topics", "comments"})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
@@ -66,7 +66,7 @@ public class Topic {
     }
 
     public int getNrOfComments() {
-        if(comments.isEmpty()) {
+        if(comments == null || comments.isEmpty()) {
             return 0;
         }else {
             return comments.size();

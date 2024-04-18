@@ -21,12 +21,12 @@ public class Comment {
     private String content;
 
     @JsonIgnoreProperties({"comments", "user"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "topic_id", referencedColumnName = "id")
     private Topic topic;
 
     @JsonIgnoreProperties({"comments", "topics"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 

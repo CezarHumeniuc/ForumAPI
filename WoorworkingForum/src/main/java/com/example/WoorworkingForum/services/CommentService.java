@@ -48,17 +48,17 @@ public class CommentService {
 
                 if (topic.isPresent()) {
                     comment.setTimeOfPosting(LocalDateTime.now());
-                    comment.setTopic(topic.get());
+//                    comment.setTopic(topic.get());
                     comment.setUser(user);
 
                     topic.get().addComment(comment);
                     topic.get().setLastUpdated(LocalDateTime.now());
 
-                    user.getComments().add(comment);
+//                    user.getComments().add(comment);
 
-                    topicRepository.saveAndFlush(topic.get());
+                    Topic topic2 = topicRepository.saveAndFlush(topic.get());
                     userRepository.saveAndFlush(user);
-                    Comment addedComment = commentRepository.saveAndFlush(comment);
+                    Comment addedComment = topic2.getComments().get(topic2.getNrOfComments() - 1);
 
                     response = new ResponseEntity<>(addedComment, HttpStatus.CREATED);
 

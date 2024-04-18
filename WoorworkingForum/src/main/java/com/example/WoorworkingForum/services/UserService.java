@@ -1,8 +1,10 @@
 package com.example.WoorworkingForum.services;
 
+import com.example.WoorworkingForum.entities.Comment;
 import com.example.WoorworkingForum.entities.User;
 import com.example.WoorworkingForum.helpers.CustomMessages;
 import com.example.WoorworkingForum.repositories.UserRepository;
+import org.hibernate.annotations.Comments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,7 +86,7 @@ public class UserService {
             }
 
         } catch (Exception e) {
-            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
+            response = new ResponseEntity<>(e.getClass() , HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return response;
@@ -131,6 +134,12 @@ public class UserService {
 
             if (user.isPresent()) {
                 if (id.equals(userId) || user.get().getRoles().contains("Admin")) {
+                    List<Comment> commentList = user.get().getComments();
+                    if (!commentList.isEmpty()) {
+                        for(Comment com : commentList) {
+                            com.setUser(null);
+                        }
+                    }
                     userRepository.deleteById(id);
                     response = new ResponseEntity<>("User removed", HttpStatus.OK);
                 }else {
