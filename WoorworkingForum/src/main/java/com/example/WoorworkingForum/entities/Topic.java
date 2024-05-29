@@ -1,8 +1,10 @@
 package com.example.WoorworkingForum.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.Type;
 
@@ -30,7 +32,7 @@ public class Topic {
 
     private LocalDateTime lastUpdated;
 
-    @JsonIgnoreProperties("topic")
+    @JsonIgnoreProperties({"topic", "comment"})
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Comment> comments;
 

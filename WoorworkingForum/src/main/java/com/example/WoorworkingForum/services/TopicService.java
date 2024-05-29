@@ -69,21 +69,25 @@ public class TopicService {
     public ResponseEntity<?> getTopic(String title) {
         ResponseEntity<?> response = null;
 
-        Topic topic = new Topic();
-        topic.setTitle(title);
+        try {
+            if (title != null) {
 
-        ExampleMatcher customExampleMatcher = ExampleMatcher.matchingAny()
-                .withMatcher("title", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
+                Optional<List<Topic>> topicList = topicRepository.findByTitle(title);
 
-        Example<Topic> example = Example.of(topic, customExampleMatcher);
+                if (topicList.isEmpty()) {
+                    response = new ResponseEntity<>("Topic Not Found", HttpStatus.NOT_FOUND);
+                } else {
+                    response = new ResponseEntity<>(topicList, HttpStatus.FOUND);
+                }
 
-        List<Topic> topicList = topicRepository.findAll(example);
+            } else {
+                response = new ResponseEntity<>(topicRepository.findAll(), HttpStatus.FOUND);
+            }
 
-        if (topicList.isEmpty()) {
-            response = new ResponseEntity<>(topicRepository.findAll(), HttpStatus.NOT_FOUND);
-        } else {
-            response = new ResponseEntity<>(topicList, HttpStatus.FOUND);
+        }catch (Exception e) {
+            response = new ResponseEntity<>(CustomMessages.INTERNAL_SERVER_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
 
         return response;
     }
